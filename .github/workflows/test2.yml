@@ -2,28 +2,28 @@ name: placeholder_Name
 
 on:
   pull_request:
-    branches: branch-name
+    branches: [branch-name]
   push:
     branches:
       - branch-2
 
 jobs:
   build:
-  - name: Placeholder
-    strategy: matrix
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [8] # Assuming you want to use a matrix for Java versions
     steps:
-      with:
-        path: ~/.maven-
-        key: ${{ runner.os }}-maven-${{ hashfiles(arg) }}
-      uses: actions/cache@version
-    - name: build with maven-
-      uses: actions/setup-java@version
+    - uses: actions/checkout@v2
+    - name: Set up Java
+      uses: actions/setup-java@v2
       with:
         java-version: ${{ matrix.java }}
-      uses: actions/checkout@version
-    run: mvn clean package -DskipTests=true -Dcheckstyle.skip=true
-
-macos:
-  jdk: openjdk8
-
+        distribution: 'adopt'
+    - name: Cache Maven packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+    - name: Build with Maven
+      run: mvn clean package -DskipTests=true -Dcheckstyle.skip=true
